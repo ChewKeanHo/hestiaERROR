@@ -1,26 +1,36 @@
 {
-  "name": "hestiai18n",
+  "name": "hestiaerror",
   "version": "0.0.1",
   "type": "module",
-  "description": "One Peaceful Frontend+Backend Software Library Suite: internationalization (i18n).",
+  "description": "One Peaceful Frontend+Backend Software Libraries Suite.",
   "scripts": {
     "build": "tsc -p tsconfig-build.json",
     "test": "tsc -p tsconfig-test.json && c8 --config c8rc.json jasmine --config=tsconfig-test.json"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ChewKeanHo/LIBS_hestiaI18N.git"
+    "url": "git+https://github.com/ChewKeanHo/hestiaERROR.git"
   },
   "keywords": [
+    "hestiaERROR",
+    "error numbering",
+    "error numbers",
+    "super libraries",
+    "programming languages",
+    "library",
+    "continuous integration",
+    "native and locally available",
+    "solid foundation",
+    "self-improvable",
     "i18n",
     "typescript"
   ],
   "author": " (Holloway)",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/ChewKeanHo/LIBS_hestiaI18N/issues"
+    "url": "https://github.com/ChewKeanHo/hestiaERROR/issues"
   },
-  "homepage": "https://github.com/ChewKeanHo/LIBS_hestiaI18N",
+  "homepage": "https://github.com/ChewKeanHo/hestiaERROR",
   "devDependencies": {
     "@types/jasmine": "^5.1.4",
     "@types/node": "^20.12.7",
