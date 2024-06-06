@@ -1,0 +1,4 @@
+srcNODE: added source codes
+root: renamed .src/ to src/
+root: added srcNODE/ into repository
+.gitignore: added syncthing artifacts

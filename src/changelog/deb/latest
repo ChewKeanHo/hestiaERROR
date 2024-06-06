@@ -1,0 +1,8 @@
+hestiaerror (0.0.1) stable; urgency=low
+
+  * srcNODE: added source codes
+  * root: renamed .src/ to src/
+  * root: added srcNODE/ into repository
+  * .gitignore: added syncthing artifacts
+
+-- (Holloway) Chew, Kean Ho <hello@hollowaykeanho.com>  Thu, 06 Jun 2024 15:05:14 +0800
