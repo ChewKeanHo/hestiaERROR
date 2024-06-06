@@ -3,14 +3,8 @@
   "version": "0.0.1",
   "type": "module",
   "description": "One Peaceful Frontend+Backend Software Libraries Suite.",
-  "scripts": {
-    "build": "tsc -p tsconfig-build.json",
-    "test": "tsc -p tsconfig-test.json && c8 --config c8rc.json jasmine --config=tsconfig-test.json"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ChewKeanHo/hestiaERROR.git"
-  },
+  "author": " (Holloway)",
+  "license": "Apache-2.0",
   "keywords": [
     "hestiaERROR",
     "error numbering",
@@ -25,12 +19,19 @@
     "i18n",
     "typescript"
   ],
-  "author": " (Holloway)",
-  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChewKeanHo/hestiaERROR.git"
+  },
   "bugs": {
     "url": "https://github.com/ChewKeanHo/hestiaERROR/issues"
   },
   "homepage": "https://github.com/ChewKeanHo/hestiaERROR",
+  "main": "Vanilla.js",
+  "scripts": {
+    "build": "tsc -p tsconfig-build.json",
+    "test": "tsc -p tsconfig-test.json && c8 --config c8rc.json jasmine --config=tsconfig-test.json"
+  },
   "devDependencies": {
     "@types/jasmine": "^5.1.4",
     "@types/node": "^20.12.7",
