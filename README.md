@@ -1,6 +1,6 @@
 # Hestia Libraries - `hestiaERROR`
 
-[![Hestia Libraries](/src/icons/banner_1200x270.svg)](#)
+[![Hestia Libraries](https://raw.githubusercontent.com/ChewKeanHo/hestiaERROR/main/src/icons/banner_1200x270.svg)](#)
 
 One Peaceful Frontend+Backend Software Library Suite.
 
@@ -75,7 +75,7 @@ involving `npm`:
 {
   "dependencies": {
     ...
-    "@chewkeanho/hestiaERROR": "git+https://github.com/ChewKeanHo/hestiaERROR.git#[VERSION]_js"
+    "@chewkeanho/hestiaERROR": "git+https://github.com/ChewKeanHo/hestiaERROR.git#[VERSION]_npm"
     ...
   }
 }
@@ -88,7 +88,7 @@ For always latest release, please use the `latest` version tag. Example:
   ...
   "dependencies": {
     ...
-    "@chewkeanho/hestiaERROR": "git+https://github.com/ChewKeanHo/hestiaERROR.git#latest_js"
+    "@chewkeanho/hestiaERROR": "git+https://github.com/ChewKeanHo/hestiaERROR.git#latest_npm"
     ...
   }
   ...
