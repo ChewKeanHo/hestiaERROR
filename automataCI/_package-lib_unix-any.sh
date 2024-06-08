@@ -26,7 +26,7 @@ fi
 
 
 
-PACKAGE_Run_NPM() {
+PACKAGE_Run_LIB() {
         #__line="$1"
 
 
@@ -50,7 +50,7 @@ PACKAGE_Run_NPM() {
 
 
         # copy all complimentary files to the workspace
-        cmd="PACKAGE_Assemble_NPM_Content"
+        cmd="PACKAGE_Assemble_LIB_Content"
         I18N_Check_Function "$cmd"
         OS_Is_Command_Available "$cmd"
         if [ $? -ne 0 ]; then
