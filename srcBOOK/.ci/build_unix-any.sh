@@ -38,65 +38,75 @@ fi
 
 
 
-# setup inportant variables
-___name="${PROJECT_SKU}_${PROJECT_VERSION}_any-any"
-___source="book.odt"
+# setup important variables
+Build_Book() {
+        #___input="$1"
+        #___name="$2"
+
+        # build PDF
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_BOOK}/${1}"
+        ___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/build-${2}"
+        I18N_Prepare "$___source"
+        FS_Is_File "$___source"
+        if [ $? -ne 0 ]; then
+                I18N_Prepare_Failed
+                return 1
+        fi
+        FS_Remake_Directory "$___dest"
 
 
-
-
-# build PDF
-___source="${PROJECT_PATH_ROOT}/${PROJECT_BOOK}/${___source}"
-___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/build-${___name}"
-I18N_Prepare "$___source"
-FS_Is_File "$___source"
-if [ $? -ne 0 ]; then
-        I18N_Prepare_Failed
-        return 1
-fi
-
-FS_Remake_Directory "$___dest"
-
-## IMPORTANT: refer the following page for modifying parameters:
-##   https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html
-I18N_Build "$___source"
-$(LIBREOFFICE_Get) --headless --convert-to "pdf:writer_pdf_Export:{
-        \"UseLosslessCompression\": true,
-        \"Quality\": 100,
-        \"SelectPdfVersion\": 0,
-        \"PDFUACompliance\": false,
-        \"UseTaggedPDF\": true,
-        \"ExportFormFields\": true,
-        \"FormsType\": 1,
-        \"ExportBookmarks\": true,
-        \"ExportPlaceholders\": true
+        ## IMPORTANT: refer the following page for modifying parameters:
+        ##   https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html
+        I18N_Build "$___source"
+        $(LIBREOFFICE_Get) --headless --convert-to "pdf:writer_pdf_Export:{
+                \"UseLosslessCompression\": true,
+                \"Quality\": 100,
+                \"SelectPdfVersion\": 0,
+                \"PDFUACompliance\": false,
+                \"UseTaggedPDF\": true,
+                \"ExportFormFields\": true,
+                \"FormsType\": 1,
+                \"ExportBookmarks\": true,
+                \"ExportPlaceholders\": true
 }" --outdir "$___dest" "$___source"
-___process=$?
-if [ $___process -ne 0 ]; then
-        I18N_Build_Failed
-        return 1
-fi
+        ___process=$?
+        if [ $___process -ne 0 ]; then
+                I18N_Build_Failed
+                return 1
+        fi
+
+
+        ## export output
+        ___source="${___dest}/$(FS_Get_File "$___source")"
+        ___source="$(FS_Extension_Replace "$___source" ".odt" ".pdf")"
+        ___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${2}.pdf"
+
+        FS_Is_File "$___source"
+        if [ $? -ne 0 ]; then
+                I18N_Build_Failed
+                return 1
+        fi
+
+        I18N_Export "$___dest"
+        FS_Remove_Silently "$___dest"
+        FS_Make_Housing_Directory "$___dest"
+        FS_Copy_File "$___source" "$___dest"
+        if [ $? -ne 0 ]; then
+                I18N_Export_Failed
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
 
 
 
 
-## export output
-___source="${___dest}/$(FS_Get_File "$___source")"
-___source="$(FS_Extension_Replace "$___source" ".odt" ".pdf")"
-___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${___name}.pdf"
-
-FS_Is_File "$___source"
+# build books
+Build_Book "en.odt" "${PROJECT_SKU}_${PROJECT_VERSION}_en_any-any"
 if [ $? -ne 0 ]; then
-        I18N_Build_Failed
-        return 1
-fi
-
-I18N_Export "$___dest"
-FS_Remove_Silently "$___dest"
-FS_Make_Housing_Directory "$___dest"
-FS_Copy_File "$___source" "$___dest"
-if [ $? -ne 0 ]; then
-        I18N_Export_Failed
         return 1
 fi
 

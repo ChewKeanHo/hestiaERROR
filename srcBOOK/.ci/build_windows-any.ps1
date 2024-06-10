@@ -38,27 +38,29 @@ if ($___process -ne 0) {
 
 
 # setup important variables
-$___name = "${env:PROJECT_SKU}_${env:PROJECT_VERSION}_any-any"
-$___source = "book.odt"
+function Build-Book {
+	param(
+		[string]$___input,
+		[string]$___name
+	)
 
 
+	# build PDF
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_BOOK}\${___input}"
+	$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\build-${___name}"
+	$null = I18N-Prepare "${___source}"
+	$___process = FS-Is-File "${___source}"
+	if ($___process -ne 0) {
+		$null = I18N-Prepare-Failed
+		return 1
+	}
+	$null = FS-Remake-Directory "${___dest}"
 
 
-# build PDF
-$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_BOOK}\${___source}"
-$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\build-${___name}"
-$null = I18N-Prepare "${___source}"
-$___process = FS-Is-File "${___source}"
-if ($___process -ne 0) {
-	$null = I18N-Prepare-Failed
-	return 1
-}
-$null = FS-Remake-Directory "${___dest}"
-
-## IMPORTANT: refer the following page for modifying parameters:
-##   https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html
-$null = I18N-Build "${___source}"
-$___process = OS-Exec "$(LIBREOFFICE-Get)" @"
+	## IMPORTANT: refer the following page for modifying parameters:
+	##   https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html
+	$null = I18N-Build "${___source}"
+	$___process = OS-Exec "$(LIBREOFFICE-Get)" @"
 --headless --convert-to "pdf:writer_pdf_Export:{
 	"UseLosslessCompression": true,
 	"Quality": 100,
@@ -71,31 +73,43 @@ $___process = OS-Exec "$(LIBREOFFICE-Get)" @"
 	"ExportPlaceholders": true,
 }" --outdir "${___dest}" "${___source}"
 "@
-if ($___process -ne 0) {
-	$null = I18N-Build-Failed
-	return 1
+	if ($___process -ne 0) {
+		$null = I18N-Build-Failed
+		return 1
+	}
+
+
+	## export output
+	$___source = "${___dest}\$(FS-Get-File "${___source}")"
+	$___source = FS-Extension-Replace "${___source}" ".odt" ".pdf"
+	$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${___name}.pdf"
+
+	$___process = FS-Is-File "${___source}"
+	if ($___process -ne 0) {
+		$null = I18N-Build-Failed
+		return 1
+	}
+
+	$null = I18N-Export "${___dest}"
+	$null = FS-Remove-Silently "${___dest}"
+	$null = FS-Make-Housing-Directory "${___dest}"
+	$___process = FS-Copy-File "${___source}" "${___dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Export-Failed
+		return 1
+	}
+
+
+	# report status
+	return 0
 }
 
 
 
 
-# export output
-$___source = "${___dest}\$(FS-Get-File "${___source}")"
-$___source = FS-Extension-Replace "${___source}" ".odt" ".pdf"
-$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${___name}.pdf"
-
-$___process = FS-Is-File "${___source}"
+# build books
+$___process = Build-Book "en.odt" "${env:PROJECT_SKU}_${env:PROJECT_VERSION}_en_any-any"
 if ($___process -ne 0) {
-	$null = I18N-Build-Failed
-	return 1
-}
-
-$null = I18N-Export "${___dest}"
-$null = FS-Remove-Silently "${___dest}"
-$null = FS-Make-Housing-Directory "${___dest}"
-$___process = FS-Copy-File "${___source}" "${___dest}"
-if ($___process -ne 0) {
-	$null = I18N-Export-Failed
 	return 1
 }
 
