@@ -15,537 +15,598 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run me from automataCI\ci.sh.ps1 instead!`n"
-	return 1
+        Write-Error "[ ERROR ] - Please run me from automataCI\ci.sh.ps1 instead!`n"
+        return 1
 }
 
-. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
-. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
-. "${env:LIBS_AUTOMATACI}\services\io\sync.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
-. "${env:LIBS_AUTOMATACI}\services\compilers\flatpak.ps1"
-. "${env:LIBS_AUTOMATACI}\services\publishers\homebrew.ps1"
-. "${env:LIBS_AUTOMATACI}\services\versioners\git.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaCHANGELOG\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaCITATION\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaCONSOLE\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaFS\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaGIT\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaHOMEBREW\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaKERNEL\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaMSI\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaNPM\Is_Target_Valid.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaOS\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaPDF\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaRUST\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaSTRING\Vanilla.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaWASM\Is_Target_Valid_JS.sh.ps1"
+. "${env:LIBS_AUTOMATACI}\services\hestiaTIME\Vanilla.sh.ps1"
 
-. "${env:LIBS_AUTOMATACI}\_package-changelog_windows-any.ps1"
-. "${env:LIBS_AUTOMATACI}\_package-citation_windows-any.ps1"
-. "${env:LIBS_AUTOMATACI}\_package-msi_windows-any.ps1"
+
+
+
+# snap a release time
+$PACKAGE_TIME = hestiaTIME-Now
+$DIRECTORY_BUILD = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}"
+$DIRECTORY_DOTNET = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}\${env:PROJECT_PATH_DOTNET_ENGINE}"
 
 
 
 
-# 1-time setup job required materials
-$DEST = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
-$null = I18N-Remake "${DEST}"
-$___process = FS-Remake-Directory "${DEST}"
-if ($___process -ne 0) {
-	$null = I18N-Remake-Failed
-	return 1
+# clean up the entire output directory for fresh packaging
+$DIRECTORY_OUTPUT = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
+$null = hestiaCONSOLE-Log-Recreate $DIRECTORY_OUTPUT
+$___process = hestiaFS-Recreate-Directory $DIRECTORY_OUTPUT
+if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
 }
 
 
-if ($(STRINGS-Is-Empty "${env:PROJECT_HOMEBREW_URL}") -ne 0) {
-	$HOMEBREW_WORKSPACE = "packagers-homebrew-${env:PROJECT_SKU}"
-	$null = I18N-Setup "${HOMEBREW_WORKSPACE}"
-	$HOMEBREW_WORKSPACE = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${HOMEBREW_WORKSPACE}"
-	$___process = FS-Remake-Directory "${HOMEBREW_WORKSPACE}"
-	if ($___process -ne 0) {
-		$null = I18N-Setup-Failed
-		return 1
-	}
+
+
+# clean up homebrew consolidation directory
+if ($(hestiaSTRING-Is-Empty ${env:PROJECT_HOMEBREW_URL}) -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $DIRECTORY_HOMEBREW = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-homebrew-${env:PROJECT_SKU}"
+        $null = hestiaCONSOLE-Log-Recreate $DIRECTORY_HOMEBREW
+        $___process = hestiaFS-Recreate-Directory $DIRECTORY_HOMEBREW
+        if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+                return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+        }
 }
 
 
-if ($(STRINGS-Is-Empty "${env:PROJECT_MSI_INSTALL_DIRECTORY}") -ne 0) {
-	$MSI_WORKSPACE = "packagers-msi-${env:PROJECT_SKU}"
-	$null = I18N-Setup "${MSI_WORKSPACE}"
-	$MSI_WORKSPACE = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${MSI_WORKSPACE}"
-	$___process = FS-Remake-Directory "${MSI_WORKSPACE}"
-	if ($___process -ne 0) {
-		$null = I18N-Setup-Failed
-		return 1
-	}
 
 
-	if ($(STRINGS-Is-Empty "${env:PROJECT_MSI_REGISTRY_KEY}") -eq 0) {
-		${env:PROJECT_MSI_REGISTRY_KEY} = @"
+# clean up msi (windows) consolidation directory
+if ($(hestiaSTRING-Is-Empty ${env:PROJECT_MSI_CODEPAGE}) -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $DIRECTORY_MSI = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-msi-${env:PROJECT_SKU}"
+        $null = hestiaCONSOLE-Log-Recreate $DIRECTORY_MSI
+        $___process = hestiaFS-Recreate-Directory $DIRECTORY_MSI
+        if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+                return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+        }
+
+        if ($(hestiaSTRING-Is-Empty $env:PROJECT_MSI_REGISTRY_KEY) -eq ${env:hestiaKERNEL_ERROR_OK}) {
+                ${env:PROJECT_MSI_REGISTRY_KEY} = @"
 Software\${env:PROJECT_SCOPE}\InstalledProducts\${env:PROJECT_SKU_TITLECASE}
 "@
-	}
+        }
 }
 
 
-if ($(STRINGS-Is-Empty "${env:PROJECT_FLATPAK_URL}") -ne 0) {
-	$FLATPAK_REPO = "flatpak-repo"
-	$null = I18N-Setup "${FLATPAK_REPO}"
-	$FLATPAK_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${FLATPAK_REPO}"
-	$null = FS-Remove-Silently "$FLATPAK_REPO"
 
-	if (($(STRINGS-Is-Empty "${env:PROJECT_FLATPAK_REPO}") -ne 0) -and
-		($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_REPO}") -ne 0)) {
-		# version controlled repository supplied; AND
-		# single unified repository is not enabled
-		$null = FS-Make-Housing-Directory "$FLATPAK_REPO"
-		$___process = GIT-Clone-Repo `
-			"${env:PROJECT_PATH_ROOT}" `
-			"${env:PROJECT_PATH_TEMP}" `
-			"$(Get-Location)" `
-			"${env:PROJECT_FLATPAK_REPO}" `
-			"${env:PROJECT_SIMULATE_RUN}" `
-			"$(FS-Get-File "${env:FLATPAK_REPO}")" `
-			"${env:PROJECT_FLATPAK_REPO_BRANCH}"
-		if ($___process -ne 0) {
-			$null = I18N-Setup-Failed
-			return 1
-		}
 
-		if ($(STRINGS-Is-Empty "${env:PROJECT_FLATPAK_PATH}") -ne 0) {
-			$FLATPAK_REPO = "${FLATPAK_REPO}/${env:PROJECT_FLATPAK_PATH}"
-		}
-	}
+# clean up flatpak repository directory
+if ($(hestiaSTRING-Is-Empty $env:PROJECT_FLATPAK_URL) -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $DIRECTORY_FLATPAK = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-flatpak-${env:PROJECT_SKU}"
+        $null = hestiaCONSOLE-Log-Recreate $DIRECTORY_FLATPAK
+        $null = hestiaFS-Remove $DIRECTORY_FLATPAK
 
-	$___process = FS-Make-Directory "$FLATPAK_REPO"
-	if ($___process -ne 0) {
-		$null = I18N-Setup-Failed
-		return 1
-	}
+        if (
+                ($(hestiaSTRING-Is-Empty ${env:PROJECT_FLATPAK_REPO}) -ne ${env:hestiaKERNEL_ERROR_OK}) -and
+                ($(hestiaSTRING-Is-Empty ${env:PROJECT_RELEASE_REPO}) -eq ${env:hestiaKERNEL_ERROR_OK})
+        ) {
+                if ($(hestiaOS-Is-Simulation-Mode) -eq ${env:hestiaKERNEL_ERROR_OK}) {
+                        $null = hestiaCONSOLE-Log-Recreate-Simulate $DIRECTORY_FLATPAK
+                } else {
+                        # version controlled repository supplied; AND
+                        # single unified repository is not enabled
+                        $___process = hestiaGIT-Clone `
+                                ${env:PROJECT_FLATPAK_REPO} `
+                                $DIRECTORY_FLATPAK
+                        if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                                $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+                                return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                        }
+
+                        $___process = hestiaGIT-Change-Branch `
+                                $DIRECTORY_FLATPAK `
+                                ${env:PROJECT_FLATPAK_REPO_BRANCH}
+                        if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                                $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+                                return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                        }
+                }
+
+                if ($(hestiaSTRING-Is-Empty ${env:PROJECT_FLATPAK_PATH}) -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                        $DIRECTORY_FLATPAK = "${DIRECTORY_FLATPAK}\${env:PROJECT_FLATPAK_PATH}"
+                }
+        }
+
+        $___process = hestiaFS-Create-Directory ${DIRECTORY_FLATPAK}
+        if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+                return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+        }
 }
 
 
+
+
+# clean up changelog directory
+$DIRECTORY_CHANGELOG = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-changelog"
+$null = hestiaCONSOLE-Log-Recreate ${DIRECTORY_CHANGELOG}
+$___process = hestiaFS-Recreate-Directory ${DIRECTORY_CHANGELOG}
+if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+}
+
+
+
+
+# generate markdown changelog
 $FILE_CHANGELOG_MD = "${env:PROJECT_SKU}-CHANGELOG_${env:PROJECT_VERSION}.md"
 $FILE_CHANGELOG_MD = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${FILE_CHANGELOG_MD}"
-$FILE_CHANGELOG_DEB = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-changelog\deb.gz"
-$___process = Package-Run-CHANGELOG "$FILE_CHANGELOG_MD" "$FILE_CHANGELOG_DEB"
-if ($___process -ne 0) {
-	return 1
+$null = hestiaCONSOLE-Log-Recreate $FILE_CHANGELOG_MD
+$___process = hestiaCHANGELOG-Assemble-MARKDOWN `
+        $FILE_CHANGELOG_MD `
+        "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog\data" `
+        ${env:PROJECT_CHANGELOG_TITLE} `
+        ${env:PROJECT_VERSION}
+if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
 }
 
 
+
+
+# generate deb changelog
+$FILE_CHANGELOG_DEB = "${DIRECTORY_CHANGELOG}\deb"
+$null = hestiaCONSOLE-Log-Recreate $FILE_CHANGELOG_DEB
+$___process = hestiaCHANGELOG-Assemble-DEB `
+        $FILE_CHANGELOG_DEB `
+        "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog\deb" `
+        ${env:PROJECT_VERSION}
+if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+}
+
+$FILE_CHANGELOG_DEB = "${FILE_CHANGELOG_DEB}.gz"
+if ($(hestiaFS-Is-File $FILE_CHANGELOG_DEB) -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+}
+
+
+
+
+# generate rpm changelog
+$FILE_CHANGELOG_RPM = "${DIRECTORY_CHANGELOG}\rpm"
+$null = hestiaCONSOLE-Log-Recreate $FILE_CHANGELOG_RPM
+$___process = hestiaCHANGELOG-Assemble-RPM `
+        $FILE_CHANGELOG_RPM `
+        "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog\data" `
+        "$(hestiaTIME-Format-Date-RPM $PACKAGE_TIME)" `
+        ${env:PROJECT_CONTACT_NAME} `
+        ${env:PROJECT_CONTACT_EMAIL} `
+        ${env:PROJECT_VERSION} `
+        ${env:PROJECT_CADENCE}
+if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+}
+
+
+
+
+# generate CITATION.cff
 $FILE_CITATION_CFF = "${env:PROJECT_SKU}-CITATION_${env:PROJECT_VERSION}.cff"
 $FILE_CITATION_CFF = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${FILE_CITATION_CFF}"
-$___process = Package-Run-CITATION "$FILE_CITATION_CFF"
-if ($___process -ne 0) {
-	return 1
+$null = hestiaCONSOLE-Log-Recreate $FILE_CITATION_CFF
+$___process = hestiaCITATION-Assemble `
+        $FILE_CITATION_CFF `
+        "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\ABSTRACTS.txt" `
+        "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\CITATIONS.yml" `
+        ${env:PROJECT_CITATION} `
+        ${env:PROJECT_CITATION_TYPE} `
+        "$(hestiaTIME-Format-Date-ISO8601 "${PACKAGE_TIME}")" `
+        ${env:PROJECT_NAME} `
+        ${env:PROJECT_VERSION} `
+        ${env:PROJECT_LICENSE} `
+        ${env:PROJECT_SOURCE_URL} `
+        ${env:PROJECT_SOURCE_URL} `
+        ${env:PROJECT_STATIC_URL} `
+        ${env:PROJECT_CONTACT_NAME} `
+        ${env:PROJECT_CONTACT_WEBSITE} `
+        ${env:PROJECT_CONTACT_EMAIL}
+if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
 }
 
 
-$null = I18N-Newline
 
 
-
-
-# prepare for parallel package
-$__log_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\packagers"
-$null = I18N-Remake "${__log_directory}"
-$null = FS-Remake-Directory "${__log_directory}"
-$___process = FS-Is-Directory "${__log_directory}"
-if ($___process -ne 0) {
-	$null = I18N-Remake-Failed
-	return 1
+# clean up log directory
+$DIRECTORY_LOG = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\packagers"
+$null = hestiaCONSOLE-Log-Recreate $DIRECTORY_LOG
+$___process = hestiaFS-Recreate-Directory $DIRECTORY_LOG
+if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
 }
 
 
-$__control_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-parallel"
-$null = I18N-Remake "${__control_directory}"
-$null = FS-Remake-Directory "${__control_directory}"
-$___process = FS-Is-Directory "${__control_directory}"
-if ($___process -ne 0) {
-	$null = I18N-Remake-Failed
-	return 1
+
+
+# clean up parallel control directory
+$DIRECTORY_PARALLEL = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-parallel"
+$null = hestiaCONSOLE-Log-Recreate $DIRECTORY_PARALLEL
+$___process = hestiaFS-Recreate-Directory $DIRECTORY_PARALLEL
+if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
 }
 
 
-$__parallel_control = "${__control_directory}\control-parallel.txt"
-$null = FS-Remove-Silently "${__parallel_control}"
 
 
-$__serial_control = "${__control_directory}\control-serial.txt"
-$null = FS-Remove-Silently "${__serial_control}"
+# clean up serial control directory
+$DIRECTORY_SERIAL = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-serial"
+$null = hestiaCONSOLE-Log-Recreate $DIRECTORY_SERIAL
+$___process = hestiaFS-Recreate-Directory $DIRECTORY_SERIAL
+if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $null = hestiaCONSOLE-Log-Recreate-Failed $___process
+        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+}
 
 
+
+
+# setup subroutine function for parallel executions
 function SUBROUTINE-Package {
-	param(
-		[string]$__line
-	)
+        param(
+                [string]$__line
+        )
 
 
-	# initialize libraries from scratch
-	$null = . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+        # parse input
+        $__arguments = $__line.Split("|")
+        $__filename = $__arguments[0]
+        $__target = $__arguments[1]
+        $__target_os = $__arguments[2]
+        $__target_arch = $__arguments[3]
+        $__package_time = $__arguments[4]
+        $__function = $__arguments[-1]
+        $__directory_log = $__arguments[-2]
+        $__directory_output = $__arguments[-3]
 
-	$null = . "${env:LIBS_AUTOMATACI}\_package-archive_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-cargo_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-changelog_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-chocolatey_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-deb_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-docker_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-flatpak_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-homebrew_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-ipk_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-lib_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-msi_windows-any.ps1"
-
-	$null = . "${env:LIBS_AUTOMATACI}\_package-pypi_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-rpm_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-sourcing_windows-any.ps1"
+        if ($__directory_output -eq $__arguments[-4]) {
+                $__arguments = ""
+        } else {
+                $__arguments = $__arguments[5..($__arguments.Length - 4)] -join "|"
+        }
 
 
-	# parse input
-	$__command = $__line.Split("|")[-1]
-	$__log = $__line.Split("|")[-2]
-	$__arguments = $__line.Split("|")
-	$__arguments = $__arguments[0..$($__arguments.Length - 3)]
-	$__arguments = $__arguments -Join "|"
-
-	$__subject = Split-Path -Leaf -Path "${__log}"
-	$__subject = FS-Extension-Remove "${__subject}" "*"
+        # import required libraries
+        $null = . "${env:LIBS_AUTOMATACI}\services\hestiaKERNEL\Vanilla.sh.ps1"
 
 
-	# execute
-	$null = I18N-Package "${__subject}"
-	$null = FS-Remove-Silently "${__log}"
+        # execute
+        switch ("${__function}") {
+        "PACKAGE-APP" {
+                $__log = "${__directory_log}\app-${__filename}_${__target_os}-${__target_arch}.txt"
+        } "PACKAGE-ARCHIVE" {
+                $__log = "${__directory_log}\archive-${__filename}_${__target_os}-${__target_arch}.txt"
+                $null = . "${env:LIBS_AUTOMATACI}\_package-archive_windows-any.ps1"
+                $($___process = PACKAGE-ARCHIVE `
+                        $__filename `
+                        $__target `
+                        $__target_os `
+                        $__target_arch `
+                        $__package_time `
+                        $__directory_output `
+                        $__arguments) *>> $__log
+                if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                }
+        } "PACKAGE-SINGLE" {
+                $__log = "${__directory_log}\single-${__filename}_${__target_os}-${__target_arch}.txt"
+                $null = . "${env:LIBS_AUTOMATACI}\_package-single_windows-any.ps1"
+                $($___process = Package-SINGLE `
+                        $__filename `
+                        $__target `
+                        $__target_os `
+                        $__target_arch `
+                        $__package_time `
+                        $__directory_output `
+                        $__arguments) *>> $__log
+                if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                }
+        } "PACKAGE-UNIX" {
+                $__log = "${__directory_log}\unix-${__filename}_${__target_os}-${__target_arch}.txt"
+        } "PACKAGE-WINDOWS" {
+                $__log = "${__directory_log}\windows-${__filename}_${__target_os}-${__target_arch}.txt"
+                $null = . "${env:LIBS_AUTOMATACI}\_package-windows_windows-any.ps1"
+                $($___process = PACKAGE-WINDOWS `
+                        $__filename `
+                        $__target `
+                        $__target_os `
+                        $__target_arch `
+                        $__package_time `
+                        $__directory_output `
+                        $__arguments) *>> $__log
+                if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                }
+        } "PACKAGE-CONSOLIDATE" {
+                $__log = "${__directory_log}\consolidate-${__filename}_${__target_os}-${__target_arch}.txt"
+                $null = . "${env:LIBS_AUTOMATACI}\_package-consolidate_windows-any.ps1"
+                $($___process = PACKAGE-CONSOLIDATE `
+                        $__filename `
+                        $__target `
+                        $__target_os `
+                        $__target_arch `
+                        $__package_time `
+                        $__directory_output `
+                        $__arguments) *>> $__log
+                if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                }
+        } default {
+                return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+        }}
 
-	try {
-		${function:SUBROUTINE-Exec} = Get-Command `
-			"${__command}" `
-			-ErrorAction SilentlyContinue
-		$($___process = SUBROUTINE-Exec "${__arguments}") *> "${__log}"
-	} catch {
-		$___process = 1
-	}
-	if ($___process -ne 0) {
-		$null = I18N-Package-Failed
-		return 1
-	}
 
-
-	# report status
-	return 0
+        # report status
+        return ${env:hestiaKERNEL_ERROR_OK}
 }
 
 
 
 
-# begin registering packagers
-if ($(FS-Is-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}") -eq 0) {
-foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}")) {
-	$i = $i.FullName
-
-	$___process = FS-Is-File "$i"
-	if ($___process -ne 0) {
-		continue
-	}
-
-
-	# parse build candidate
-	$null = I18N-Detected "${i}"
-	$TARGET_FILENAME = Split-Path -Leaf $i
-	$TARGET_FILENAME = $TARGET_FILENAME -replace "\..*$"
-	$TARGET_OS = $TARGET_FILENAME -replace ".*_"
-	$TARGET_FILENAME = $TARGET_FILENAME -replace "_.*"
-	$TARGET_ARCH = $TARGET_OS -replace ".*-"
-	$TARGET_ARCH = $TARGET_ARCH -replace "\..*$"
-	$TARGET_OS = $TARGET_OS -replace "-.*"
-	$TARGET_OS = $TARGET_OS -replace "\..*$"
-
-	if (($(STRINGS-Is-Empty "${TARGET_OS}") -eq 0) -or
-		($(STRINGS-Is-Empty "${TARGET_ARCH}") -eq 0) -or
-		($(STRINGS-Is-Empty "${TARGET_FILENAME}") -eq 0)) {
-		$null = I18N-File-Has-Bad-Stat-Skipped
-		continue
-	}
-
-	$___process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "${TARGET_FILENAME}"
-	if ($___process -ne 0) {
-		$___process = STRINGS-Has-Prefix "lib${env:PROJECT_SKU}" "${TARGET_FILENAME}"
-		if ($___process -ne 0) {
-			$null = I18N-Is-Incompatible-Skipped "${TARGET_FILENAME}"
-			continue
-		}
-	}
-
-	$__common = "${DEST}|${i}|${TARGET_FILENAME}|${TARGET_OS}|${TARGET_ARCH}"
-
-
-	# begin registrations
-	$null = I18N-Sync-Register "$i"
-
-	if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_ARCHIVE}") -ne 0) {
-		$__log = "archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-		$__log = "${__log_directory}\${__log}"
-		$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-ARCHIVE
-
-"@
-		if ($___process -ne 0) {
-			return 1
-		}
-	}
-
-	if ($(STRINGS-Is-Empty "${env:PROJECT_RUST}") -ne 0) {
-		$__log = "cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-		$__log = "${__log_directory}\${__log}"
-		$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-CARGO
-
-"@
-		if ($___process -ne 0) {
-			return 1
-		}
-	}
-
-	# NOTE: chocolatey only serve windows
-	if ($(STRINGS-Is-Empty "${env:PROJECT_CHOCOLATEY_URL}") -ne 0) {
-		switch ("${TARGET_OS}") {
-		{ $_ -in "any", "windows" } {
-			$__log = "chocolatey_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-			$__log = "${__log_directory}\${__log}"
-			$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-CHOCOLATEY
-
-"@
-			if ($___process -ne 0) {
-				return 1
-			}
-		} default {
-		}}
-	}
-
-	# NOTE: deb does not work in windows or mac
-	if ($(STRINGS-Is-Empty "${env:PROJECT_DEB_URL}") -ne 0) {
-		switch ("${TARGET_OS}") {
-		{ $_ -in "windows", "darwin" } {
-			$__log = "deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-			$__log = "${__log_directory}\${__log}"
-			$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE-Run-DEB
-
-"@
-			if ($___process -ne 0) {
-				return 1
-			}
-		} default {
-		}}
-	}
-
-	# NOTE: container only server windows and linux
-	if ($(STRINGS-Is-Empty "${env:PROJECT_CONTAINER_REGISTRY}") -ne 0) {
-		switch ("${TARGET_OS}") {
-		{ $_ -in "any", "linux", "windows" } {
-			$__log = "docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-			$__log = "${__log_directory}\${__log}"
-			$___process = FS-Append-File "${__serial_control}" @"
-${__common}|${__log}|PACKAGE-Run-DOCKER
-
-"@
-			if ($___process -ne 0) {
-				return 1
-			}
-		} default {
-		}}
-	}
-
-	# NOTE: flatpak only serve linux
-	$___process = FLATPAK-Is-Available
-	if (($___process -eq 0) -and
-		($(STRINGS-Is-Empty "${env:PROJECT_FLATPAK_URL}") -ne 0)) {
-		switch ("${TARGET_OS}") {
-		{ $_ -in "any", "linux" } {
-			$__log = "flatpak_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-			$__log = "${__log_directory}\${__log}"
-			$___process = FS-Append-File "${__serial_control}" @"
-${__common}|${FLATPAK_REPO}|${__log}|PACKAGE-Run-FLATPAK
-
-"@
-			if ($___process -ne 0) {
-				return 1
-			}
-		} default {
-		}}
-	}
-
-	# NOTE: homebrew only serve linux and mac
-	if ($(STRINGS-Is-Empty "${env:PROJECT_HOMEBREW_URL}") -ne 0) {
-		switch ("${TARGET_OS}") {
-		{ $_ -in "any", "darwin", "linux" } {
-			$__log = "homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-			$__log = "${__log_directory}\${__log}"
-			$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${HOMEBREW_WORKSPACE}|${__log}|PACKAGE-Run-HOMEBREW
-
-"@
-			if ($___process -ne 0) {
-				return 1
-			}
-		} default {
-		}}
-	}
-
-	if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_IPK}") -ne 0) {
-		$__log = "ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-		$__log = "${__log_directory}\${__log}"
-		$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-IPK
-
-"@
-		if ($___process -ne 0) {
-			return 1
-		}
-	}
-
-	if (($(FS-Is-Target-A-Library "${i}") -eq 0) -and
-		($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_ARCHIVE}") -ne 0)) {
-		$__log = "lib_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-		$__log = "${__log_directory}\${__log}"
-		$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-LIB
-
-"@
-		if ($___process -ne 0) {
-			return 1
-		}
-	}
-
-	# NOTE: MSI only works in windows
-	if ($(STRINGS-Is-Empty "${env:PROJECT_MSI_INSTALL_DIRECTORY}") -ne 0) {
-		switch ("${TARGET_OS}") {
-		{ $_ -in "any", "windows" } {
-			$__log = "msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-			$__log = "${__log_directory}\${__log}"
-			$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${MSI_WORKSPACE}|${__log}|PACKAGE-Run-MSI
-
-"@
-			if ($___process -ne 0) {
-				return 1
-			}
-		} default {
-		}}
-	}
-
-	if ($(FS-Is-Target-A-PDF "${i}") -eq 0) {
-		$__log = "PDF_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-		$__log = "${__log_directory}\${__log}"
-		$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-PDF
-
-"@
-		if ($___process -ne 0) {
-			return 1
-		}
-	}
-
-	if ($(STRINGS-Is-Empty "${env:PROJECT_PYTHON}") -ne 0) {
-		$__log = "pypi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-		$__log = "${__log_directory}\${__log}"
-		$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-PYPI
-
-"@
-		if ($___process -ne 0) {
-			return 1
-		}
-	}
-
-	# NOTE: RPM only serve linux
-	if ($(STRINGS-Is-Empty "${env:PROJECT_RPM_URL}") -ne 0) {
-		switch ("${TARGET_OS}") {
-		{ $_ -in "any", "linux" } {
-			$__log = "rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-			$__log = "${__log_directory}\${__log}"
-			$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-RPM
-
-"@
-			if ($___process -ne 0) {
-				return 1
-			}
-		} default {
-		}}
-	}
+# register built artifacts for parallel executions
+if ($(hestiaFS-Is-Directory $DIRECTORY_BUILD) -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        # no artifacts at all - report status
+        $null = hestiaCONSOLE-Log-Success
+        return ${env:hestiaKERNEL_ERROR_OK}
 }
+
+foreach ($__artifact in (Get-ChildItem -Path $DIRECTORY_BUILD)) {
+        if ($(hestiaFS-Is-File $__artifact) -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                continue
+        }
+
+
+        # parse build candidate
+        $TARGET_FILENAME = hestiaFS-Get-File $__artifact
+        $TARGET_FILENAME = $TARGET_FILENAME -replace "\..*$", ''
+        $TARGET_OS = $TARGET_FILENAME -replace ".*_", ''
+        $TARGET_FILENAME = $TARGET_FILENAME -replace "_.*", ''
+        $TARGET_ARCH = $TARGET_OS -replace ".*-", ''
+        $TARGET_ARCH = $TARGET_ARCH -replace "\..*$", ''
+        $TARGET_OS = $TARGET_OS -replace "-.*", ''
+        $TARGET_OS = $TARGET_OS -replace "\..*$", ''
+        $TAG_COMMON = "${TARGET_FILENAME}|${__artifact}|${TARGET_OS}|${TARGET_ARCH}|${PACKAGE_TIME}"
+
+        if (
+                ($(hestiaSTRING-Is-Empty $TARGET_OS) -eq ${env:hestiaKERNEL_ERROR_OK}) -or
+                ($(hestiaSTRING-Is-Empty $TARGET_ARCH) -eq ${env:hestiaKERNEL_ERROR_OK}) -or
+                ($(hestiaSTRING-Is-Empty $TARGET_FILENAME) -eq ${env:hestiaKERNEL_ERROR_OK})
+        ) {
+                continue
+        }
+
+
+        # register for single object type package
+        if (
+                ($(hestiaPDF-Is-Target-Valid $__artifact) -eq ${env:hestiaKERNEL_ERROR_OK})
+        ) {
+                # register for single object type package
+                $___process = hestiaFS-Append-File "${DIRECTORY_PARALLEL}/control.txt" @"
+${TAG_COMMON}|${DIRECTORY_OUTPUT}|${DIRECTORY_LOG}|PACKAGE-SINGLE
+
+"@
+                if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                }
+
+                continue
+        }
+
+
+        # register for classical .tar.xz, .zip, & .nupkg types
+        $___process = hestiaFS-Append-File "${DIRECTORY_PARALLEL}/control.txt" @"
+${TAG_COMMON}|${DIRECTORY_OUTPUT}|${DIRECTORY_LOG}|PACKAGE-ARCHIVE
+
+"@
+        if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+        }
+
+
+        # bail tech-specific artifacts since the following no longer needs them
+        if (
+                ($(hestiaWASM-Is-Target-Valid-JS $__artifact) -eq ${env:hestiaKERNEL_ERROR_OK}) -or
+                ($(hestiaNPM-Is-Target-Valid $__artifact) -eq ${env:hestiaKERNEL_ERROR_OK}) -or
+                ($(hestiaRUST-Is-Target-Valid $__artifact) -eq ${env:hestiaKERNEL_ERROR_OK})
+        ) {
+                continue
+        }
+
+
+        # register for homebrew type
+        if (
+                ($(hestiaSTRING-Is-Empty ${env:PROJECT_HOMEBREW_URL}) -ne ${env:hestiaKERNEL_ERROR_OK}) -and
+                ($TARGET_OS -ne "windows")
+        ) {
+                $___process = hestiaFS-Append-File "${DIRECTORY_PARALLEL}/control.txt" @"
+${TAG_COMMON}|${DIRECTORY_HOMEBREW}|${DIRECTORY_LOG}|PACKAGE-CONSOLIDATE
+
+"@
+                if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                }
+        }
+
+
+        # register for windows type
+        if (
+                ($(hestiaSTRING-Is-Empty ${env:PROJECT_MSI_CODEPAGE}) -ne ${env:hestiaKERNEL_ERROR_OK}) -and
+                (
+                        ($TARGET_OS -eq "windows") -or
+                        ($TARGET_OS -eq "any")
+                )
+        ) {
+                $___process = hestiaFS-Append-File "${DIRECTORY_PARALLEL}/control.txt" @"
+${TAG_COMMON}|${DIRECTORY_MSI}|${DIRECTORY_LOG}|PACKAGE-WINDOWS
+
+"@
+                if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                }
+        }
+
+
+        # register app-only sandboxed|containerized packages
 }
 
 
-$null = I18N-Sync-Run
-$___process = FS-Is-File "${__parallel_control}"
-if ($___process -eq 0) {
-	$___process = SYNC-Exec-Parallel `
-		${function:SUBROUTINE-Package}.ToString() `
-		"${__parallel_control}" `
-		"${__control_directory}"
-	if ($___process -ne 0) {
-		$null = I18N-Sync-Failed
-		return 1
-	}
+
+
+# execute in parallel
+$null = hestiaCONSOLE-Log-Run $DIRECTORY_PARALLEL
+if ($(hestiaFS-Is-File "${DIRECTORY_PARALLEL}\control.txt") -eq ${env:hestiaKERNEL_ERROR_OK}) {
+        $___process = hestiaKERNEL-Run-Parallel-Sentinel `
+                ${function:SUBROUTINE-Package}.ToString() `
+                $DIRECTORY_PARALLEL
+        if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                $null = hestiaCONSOLE-Log-Run-Failed $___process
+                return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+        }
 }
 
 
-if ($(STRINGS-Is-Empty "${env:PROJECT_HOMEBREW_URL}") -ne 0) {
-	$null = I18N-Newline
-	$null = I18N-Newline
 
-	$__dest = "${env:PROJECT_SKU}.rb"
-	$null = I18N-Export "${__dest}"
-	$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${__dest}"
-	$___process = HOMEBREW-Seal "${__dest}" `
-		"${env:PROJECT_SKU}-homebrew_${env:PROJECT_VERSION}_any-any.tar.xz" `
-		"${HOMEBREW_WORKSPACE}" `
-		"${env:PROJECT_SKU}" `
-		"${env:PROJECT_PITCH}" `
-		"${env:PROJECT_CONTACT_WEBSITE}" `
-		"${env:PROJECT_LICENSE}" `
-		"${env:PROJECT_HOMEBREW_URL}"
-	if ($___process -ne 0) {
-		$null = I18N-Export-Failed
-		return 1
-	}
+
+# execute homebrew package
+if ($(hestiaSTRING-Is-Empty ${env:PROJECT_HOMEBREW_URL}) -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${env:PROJECT_SKU}.rb"
+        $null = hestiaCONSOLE-Log-Package $__dest
+        $___process = hestiaHOMEBREW-Package `
+                $__dest `
+                "${env:PROJECT_SKU}-${env:PROJECT_HOMEBREW_ID}_${env:PROJECT_VERSION}_any-any.tar.xz" `
+                $DIRECTORY_HOMEBREW `
+                ${env:PROJECT_SKU} `
+                ${env:PROJECT_PITCH} `
+                ${env:PROJECT_CONTACT_WEBSITE} `
+                ${env:PROJECT_LICENSE} `
+                ${env:PROJECT_HOMEBREW_URL}
+        if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                $null = hestiaCONSOLE-Log-Package-Failed $___process
+                return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+        }
 }
 
 
-if ($(STRINGS-Is-Empty "${env:PROJECT_MSI_INSTALL_DIRECTORY}") -ne 0) {
-	$null = I18N-Newline
-	$null = I18N-Newline
 
 
-	# sort 'any' arch into others
-	$___process = PACKAGE-Sort-MSI "${MSI_WORKSPACE}"
-	if ($___process -ne 0) {
-		return 1
-	}
+# execute msi package
+if ($(hestiaSTRING-Is-Empty ${env:PROJECT_MSI_CODEPAGE}) -ne ${env:hestiaKERNEL_ERROR_OK}) {
+        $null = hestiaCONSOLE-Log-Package "MSI"
+        if ($(hestiaFS-Is-Directory "${DIRECTORY_MSI}\any") -eq ${env:hestiaKERNEL_ERROR_OK}) {
+                # 'any' arch exists - merge into existing ones
+                foreach ($_arch in (Get-ChildItem -Path $DIRECTORY_MSI)) {
+                        if ($(hestiaFS-Is-Directory $_arch) -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                                continue
+                        }
 
-	# seal all MSI packages
-	foreach ($_candidate in (Get-ChildItem -Path "${MSI_WORKSPACE}" -Directory)) {
-		$_candidate = $_candidate.FullName
+                        if ($(hestiaFS-Get-File $_arch) -eq "any") {
+                                continue
+                        }
 
-		$null = I18N-Newline
+                        $null = hestiaCONSOLE-Log-Merge $_arch "${DIRECTORY_MSI}\any"
+                        $___process = hestiaFS-Merge-Directories $_arch "${DIRECTORY_MSI}\any"
+                        if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                                $null = hestiaCONSOLE-Log-Merge-Failed $___process
+                                return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                        }
+                }
 
-		$___process = PACKAGE-Seal-MSI `
-				"${_candidate}" `
-				"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
-		if ($___process -ne 0) {
-			return 1
-		}
-	}
+
+                # remove 'any' arch to prevent dirty compilations
+                $___process = hestiaFS-Remove "${DIRECTORY_MSI}\any"
+                if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                        $null = hestiaCONSOLE-Log-Merge-Failed $___process
+                        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                }
+        }
+
+
+        # begin package creation
+        foreach ($_arch in (Get-ChildItem -Path $DIRECTORY_MSI)) {
+                if ($(hestiaFS-Is-Directory $_arch) -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                        continue
+                }
+
+
+                $null = hestiaCONSOLE-Log-Package $_arch
+                $___process = hestiaMSI-Package `
+                        "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}" `
+                        $_arch `
+                        ${env:PROJECT_SKU} `
+                        ${env:PROJECT_VERSION} `
+                        ${env:PRODUCT_APP_UUID} `
+                        ${env:PROJECT_SCOPE} `
+                        ${env:PROJECT_NAME} `
+                        ${env:PROJECT_CONTACT_NAME} `
+                        ${env:PROJECT_CONTACT_WEBSITE} `
+                        ${env:PROJECT_MSI_INSTALLER_VERSION_WINDOWS} `
+                        ${env:PROJECT_MSI_INSTALLER_SCOPE} `
+                        ${env:PROJECT_MSI_REGISTRY_KEY} `
+                        ${env:PROJECT_MSI_BIN_COMPONENT_GUID} `
+                        ${env:PROJECT_MSI_ETC_COMPONENT_GUID} `
+                        ${env:PROJECT_MSI_LIB_COMPONENT_GUID} `
+                        ${env:PROJECT_MSI_DOC_COMPONENT_GUID} `
+                        ${env:PROJECT_MSI_REGISTRIES_GUID} `
+                        ${env:PROJECT_MSI_CODEPAGE} `
+                        $DIRECTORY_DOTNET
+                if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                        $null = hestiaCONSOLE-Log-Package-Failed $___process
+                        return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+                }
+        }
 }
 
 
-$null = I18N-Sync-Run-Series
-$___process = FS-Is-File "${__serial_control}"
-if ($___process -eq 0) {
-	$___process = SYNC-Exec-Serial `
-		${function:SUBROUTINE-Package}.ToString() `
-		"${__serial_control}"
-	if ($___process -ne 0) {
-		$null = I18N-Sync-Failed
-		return 1
-	}
+
+
+# execute in serial
+$null = hestiaCONSOLE-Log-Run $DIRECTORY_SERIAL
+if ($(hestiaFS-Is-File "${DIRECTORY_SERIAL}\control.txt") -eq ${env:hestiaKERNEL_ERROR_OK}) {
+        $___process = hestiaKERNEL-Run-Parallel-Sentinel `
+                ${function:SUBROUTINE-Package}.ToString() `
+                $DIRECTORY_SERIAL `
+                "1"
+        if ($___process -ne ${env:hestiaKERNEL_ERROR_OK}) {
+                $null = hestiaCONSOLE-Log-Run-Failed $___process
+                return ${env:hestiaKERNEL_ERROR_BAD_EXEC}
+        }
 }
 
 
 
 
 # report status
-$null = I18N-Run-Successful
-return 0
+$null = hestiaCONSOLE-Log-Success
+return ${env:hestiaKERNEL_ERROR_OK}

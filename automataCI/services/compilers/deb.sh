@@ -1063,10 +1063,6 @@ DEB_Unpack() {
 
 
         # validate input
-        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ]; then
-                return 1
-        fi
-
         FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
@@ -1095,7 +1091,7 @@ DEB_Unpack() {
 
         # execute
         # copy target into directory
-        FS_Copy_File "$___target" "$___directory"
+        FS_Copy_File "$___target" "${___directory}/$(FS_Get_File "$___target")"
         if [ $? -ne 0 ]; then
                 return 1
         fi

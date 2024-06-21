@@ -35,7 +35,7 @@ RELEASE_Run_RESEARCH() {
                 return 0
         fi
 
-        if [ "${1##*${PROJECT_RESEARCH_IDENTIFIER}}" = "$1" ]; then
+        if [ "${1##*${PROJECT_RESEARCH_ID}}" = "$1" ]; then
                 return 0 # not a research paper
         fi
 
@@ -46,6 +46,7 @@ RELEASE_Run_RESEARCH() {
                 __dest="PAPER.pdf"
                 __dest="${PROJECT_PATH_ROOT}/${__dest}"
                 I18N_Publish "$__dest"
+                FS_Remove_Silently "$__dest"
                 FS_Copy_File "$1" "$__dest"
                 if [ $? -ne 0 ]; then
                         I18N_Publish_Failed

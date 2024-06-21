@@ -202,7 +202,7 @@ function CHOCOLATEY-Test {
 
 	# execute
 	$___name = Split-Path -Leaf -Path "${___target}"
-	$___name = $___name -replace '\-chocolatey.*$', ''
+	$___name = $___name -replace "_.*$", ''
 
 
 	## test install
@@ -211,8 +211,9 @@ function CHOCOLATEY-Test {
 	$___arguments = "install ${___name} " `
 			+ "--debug " `
 			+ "--verbose " `
+			+ "--pre " `
 			+ "--force " `
-			+ "--source `".`" "
+			+ "--source `".`""
 	$___process = OS-Exec "choco" "${___arguments}"
 	$null = Set-Location "${___current_path}"
 	$null = Remove-Variable "___current_path"
@@ -227,8 +228,9 @@ function CHOCOLATEY-Test {
 	$___arguments = "uninstall ${___name} " `
 			+ "--debug " `
 			+ "--verbose " `
+			+ "--pre " `
 			+ "--force " `
-			+ "--source `".`" "
+			+ "--source `".`""
 	$___process = OS-Exec "choco" "${___arguments}"
 	$null = Set-Location "${___current_path}"
 	$null = Remove-Variable "___current_path"

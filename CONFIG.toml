@@ -268,14 +268,15 @@ PROJECT_BOOK = 'srcBOOK'
 PROJECT_C = 'srcC'
 
 
-# PROJECT_C_BRANCH_TAG
+# PROJECT_C_ID
 # This is for technology tagging purposes such as but not limited to release
 # branches identification. The value shall always be lowercase, short, and
-# directly identify it is C technology.
+# directly identify as a C-based technology.
+#
+# This field shall not be EMPTY.
 #
 # Default is: 'c'
-# To disable: set it empty ''
-PROJECT_C_BRANCH_TAG = 'c'
+PROJECT_C_ID = 'c'
 
 
 
@@ -297,66 +298,6 @@ PROJECT_CITATION='1.2.0'
 #
 # Can only accept 'software' or 'dataset'. Default is 'software'.
 PROJECT_CITATION_TYPE='software'
-
-
-
-
-######################
-# DOTNET TECHNOLOGY  #
-######################
-# PROJECT_DOTNET
-# This is a control variable used for enabling .NET technology in the
-# repository. Unlike other technologies, due to .NET nature, it is basically
-# a passive library located in the following directory:
-#     ${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS/${PROJECT_PATH_DOTNET_ENGINE}
-#
-# IMPORTANT NOTE: .NET is always enabled for Windows OS due to other
-# dependencies like MSI wix toolkits and etc. This variable only affects UNIX
-# side of stuffs.
-#
-# WARNING: installing .NET can increase setup time dramatically (e.g. ~+2mins
-#          in GitHub Actions). Only include when it's absolutely used or needed.
-#
-# To enable it: simply supply the path (e.g. default is 'true').
-# To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_DOTNET = ''
-
-
-# PROJECT_PATH_DOTNET_ENGINE
-# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
-# setting up .NET localized directory.
-PROJECT_PATH_DOTNET_ENGINE = 'dotnet-engine'
-
-
-# PROJECT_DOTNET_CHANNEL
-# This is to configure the .NET version to be installed by AutomataCI. It SHALL
-# NOT be empty.
-#
-# Refer the following doc "channel" section to learn more:
-#   https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-install-script
-#
-# When in doubt, use "LTS"
-PROJECT_DOTNET_CHANNEL = 'LTS'
-
-
-# DOTNET_CLI_TELEMETRY_OPTOUT
-# .NET default telemetry setting that will transmit its usage data back to
-# Microsoft.
-#
-# To preserve privacy and considering UNIX environments, it is enabled by
-# default.
-#
-# To enable: "1"
-# To disable: commit it out.
-DOTNET_CLI_TELEMETRY_OPTOUT = '1'
-
-
-# PROJECT_PATH_NUPKG
-# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS +
-# PROJECT_PATH_DOTNET_ENGINE for for housing .NET nupkg packages. At AutomataCI,
-# .nupkg (a zip file) can be downloaded without depending on downloading the
-# entire .Net framework.
-PROJECT_PATH_NUPKG = 'nupkg'
 
 
 
@@ -628,14 +569,15 @@ PROJECT_NODE_VERSION = 'v22.2.0'
 PROJECT_NODE_NPM_REGISTRY = 'https://npm.pkg.github.com'
 
 
-# PROJECT_NODE_BRANCH_TAG
+# PROJECT_NODE_NPM_ID
 # This is for technology tagging purposes such as but not limited to release
 # branches identification. The value shall always be lowercase, short, and
-# directly identify it is Node technology.
+# directly identify as a Node NPM technology.
+#
+# This field shall not be EMPTY.
 #
 # Default is: 'npm'
-# To disable: set it empty ''
-PROJECT_NODE_BRANCH_TAG = 'npm'
+PROJECT_NODE_NPM_ID = 'npm'
 
 
 
@@ -695,16 +637,16 @@ PROJECT_PYPI_README_MIME = 'text/markdown'
 PROJECT_RESEARCH = 'srcRESEARCH'
 
 
-# PROJECT_RESEARCH_IDENTIFIER
-# The file identifier for the compiled output paper file from its peers with the
+# PROJECT_RESEARCH_ID
+# The identifier for the compiled output paper file from its peers with the
 # same formats (e.g. a bunch of PDFs). This is suffix-ed within the filename
 # itself like:
 #
-#    pattern: '${PROJECT_SKU}-${PROJECT_RESEARCH_IDENTIFIER}_v${PROJECT_VERSION}_any-any.pdf'
+#    pattern: '${PROJECT_SKU}-${PROJECT_RESEARCH_ID}_v${PROJECT_VERSION}_any-any.pdf'
 #    example: 'automataci-RESEARCH_v100.00.100_any-any.pdf'
 #
 # default is: 'RESEARCH'
-PROJECT_RESEARCH_IDENTIFIER = 'RESEARCH'
+PROJECT_RESEARCH_ID = 'RESEARCH'
 
 
 
@@ -888,13 +830,23 @@ PROJECT_RELEASE_IPK = 'enabled'
 PROJECT_CHOCOLATEY_URL = 'https://github.com/ChewKeanHo/AutomataCI/releases/latest/download'
 
 
-
-
 # PROJECT_CHOCOLATEY_VERSION
 # The Chocolatey version as a dependency. This field SHALL NOT BE EMPTY.
 #
 # Default value is: '0.9.8.21'
 PROJECT_CHOCOLATEY_VERSION = '0.9.8.21'
+
+
+# PROJECT_CHOCOLATEY_ID
+# This is for technology tagging purposes such as but not limited to release
+# branches identification. The value shall always be lowercase, short, and
+# directly identify as Chocolatey technology (including away from the original
+# DOTNET nupkg).
+#
+# This field shall not be EMPTY.
+#
+# Default is: 'chocolatey'
+PROJECT_CHOCOLATEY_ID = 'chocolatey'
 
 
 
@@ -1211,6 +1163,17 @@ PROJECT_DOCS_REPO_KEY = 'origin'
 PROJECT_DOCS_REPO_BRANCH = 'gh-pages'
 
 
+# PROJECT_DOCS_ID
+# This is for technology tagging purposes such as but not limited to release
+# branches identification. The value shall always be lowercase, short, and
+# directly identify as a documentation parcel.
+#
+# This field shall not be EMPTY.
+#
+# Default is: 'docs'
+PROJECT_DOCS_ID = 'docs'
+
+
 
 
 ##########################
@@ -1373,55 +1336,41 @@ PROJECT_HOMEBREW_REPO_KEY = 'origin'
 PROJECT_HOMEBREW_REPO_BRANCH = 'main'
 
 
+# PROJECT_HOMEBREW_ID
+# This is for technology tagging purposes such as but not limited to release
+# branches identification. The value shall always be lowercase, short, and
+# directly identify as a Homebrew distribution technology.
+#
+# This field shall not be EMPTY.
+#
+# Default is: 'homebrew'
+PROJECT_HOMEBREW_ID = 'homebrew'
+
+
 
 
 ###########################
 # DISTRIBUTION - MSI      #
 ###########################
-# PROJECT_MSI_INSTALL_DIRECTORY
-# Defines the primary directory installation value for installer execute
-# sequences ('InstallExecuteSequence'). The value can only be 'INSTALLDIR'
-# (controlled value).
+# PROJECT_MSI_CODEPAGE
+# Defines the charset of the installer.
 #
 # This field also acts as the flag for enabling or disabling the homebrew
 # pipeline.
 #
-# To enable it: set the value as 'INSTALLDIR'
+# To enable it: set a value.
 # To disable it: set it empty.
 #
-# Default is: 'INSTALLDIR' (enabled)
-PROJECT_MSI_INSTALL_DIRECTORY = 'INSTALLDIR'
-
-
-# PROJECT_MSI_ARP_INSTALL_LOCATION
-# Defines the CustomAction's ID for installer execute sequences
-# ('InstallExecuteSequence'). The value can only be 'ARPINSTALLLOCATION'
-# (controlled value).
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'ARPINSTALLLOCATION'
-PROJECT_MSI_ARP_INSTALL_LOCATION = 'ARPINSTALLLOCATION'
-
-
-# PROJECT_MSI_COMPRESSED_MODE
-# Defines the compress mode for the installer. It STRICTLY accepts lowercase
-# 'yes' or 'no' only.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'yes'
-PROJECT_MSI_COMPRESSED_MODE = 'yes'
+# Default is: '65001' (UTF-8)
+PROJECT_MSI_CODEPAGE = '65001'
 
 
 # PROJECT_MSI_INSTALLER_VERSION_UNIX
-# Defines the MSI installer version for unix workspace (where WiX is not used).
+# Defines the MSI installer version for unix workspace (where msitools is used).
 #
 # This field CANNOT BE LEFT EMPTY and is only for unix packagers.
 #
-# Default is: '400' (Windows Installer 4.0 - included in Vista)
+# Default is: '400' (MSITools - Windows Installer 4.0 - included in Vista)
 PROJECT_MSI_INSTALLER_VERSION_UNIX = '400'
 
 
@@ -1434,16 +1383,6 @@ PROJECT_MSI_INSTALLER_VERSION_UNIX = '400'
 PROJECT_MSI_INSTALLER_VERSION_WINDOWS = '500'
 
 
-# PROJECT_MSI_CODEPAGE
-# Defines the charset of the installer.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: '65001' (UTF-8)
-PROJECT_MSI_CODEPAGE = '65001'
-
-
 # PROJECT_MSI_INSTALLER_SCOPE
 # Defines the installer scope.
 #
@@ -1452,17 +1391,6 @@ PROJECT_MSI_CODEPAGE = '65001'
 #
 # Default is: 'perMachine'
 PROJECT_MSI_INSTALLER_SCOPE = 'perMachine'
-
-
-# PROJECT_MSI_REGISTRY_NAME
-# Defines the name of the registry. Unless aboslute needed, it's best to leave
-# this as it is.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'InstallLocation'
-PROJECT_MSI_REGISTRY_NAME = 'InstallLocation'
 
 
 # PROJECT_MSI_REGISTRY_KEY
@@ -1478,39 +1406,6 @@ PROJECT_MSI_REGISTRY_NAME = 'InstallLocation'
 PROJECT_MSI_REGISTRY_KEY = ''
 
 
-# PROJECT_MSI_FEATURES_ID
-# The ID for the entire installer's feature list. This the the root of the list
-# consisting of main feature list, optional features list, and etc.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'FeaturesAll'
-PROJECT_MSI_FEATURES_ID = 'FeaturesAll'
-
-
-# PROJECT_MSI_MAIN_FEATURE_ID
-# The ID for the compulsory features list. This consists of all the MUST HAVE
-# components to be installed at the client side.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'FeaturesMain'
-PROJECT_MSI_MAIN_FEATURE_ID = 'FeaturesMain'
-
-
-# PROJECT_MSI_REGISTRIES_ID
-# The ID for the compulsory main registries component. This handles the main
-# registeries internal implementations.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'RegValInstallLocation_comp'
-PROJECT_MSI_REGISTRIES_ID = 'RegValInstallLocation_comp'
-
-
 # PROJECT_MSI_REGISTRIES_GUID
 # The unique GUID for the compulsory main registries component. Its value is
 # similar to a UUID type.
@@ -1522,27 +1417,6 @@ PROJECT_MSI_REGISTRIES_ID = 'RegValInstallLocation_comp'
 #
 # Default is: '*' - in some cases may fail.
 PROJECT_MSI_REGISTRIES_GUID = '7E665EAF-446B-7738-84D9-FE18BE039400'
-
-
-# PROJECT_MSI_BIN_FEATURE_ID
-# The ID for the executables features list. When available, the executables will
-# be in this component.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'FeaturesBin'
-PROJECT_MSI_BIN_FEATURE_ID = 'FeaturesBin'
-
-
-# PROJECT_MSI_BIN_COMPONENT_ID
-# The ID for the executables component.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'ComponentBin'
-PROJECT_MSI_BIN_COMPONENT_ID = 'ComponentBin'
 
 
 # PROJECT_MSI_BIN_COMPONENT_GUID
@@ -1558,28 +1432,7 @@ PROJECT_MSI_BIN_COMPONENT_ID = 'ComponentBin'
 PROJECT_MSI_BIN_COMPONENT_GUID = '7E665EAF-446B-7738-84D9-FE18BE039401'
 
 
-# PROJECT_MSI_CONFIG_FEATURE_ID
-# The ID for the config files features list. When available, the config files
-# will be in this component.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'FeaturesBin'
-PROJECT_MSI_CONFIG_FEATURE_ID = 'FeaturesConfig'
-
-
-# PROJECT_MSI_CONFIG_COMPONENT_ID
-# The ID for the config files component.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'ComponentConfig'
-PROJECT_MSI_CONFIG_COMPONENT_ID = 'ComponentConfig'
-
-
-# PROJECT_MSI_CONFIG_COMPONENT_GUID
+# PROJECT_MSI_ETC_COMPONENT_GUID
 # The unique GUID for the config files component. Its value is similar to
 # an UUID type.
 #
@@ -1589,28 +1442,7 @@ PROJECT_MSI_CONFIG_COMPONENT_ID = 'ComponentConfig'
 # When in doubt, use the PROJECT_UUID and play with the last 6 characters.
 #
 # Default is: '*' - in some cases may fail.
-PROJECT_MSI_CONFIG_COMPONENT_GUID = '7E665EAF-446B-7738-84D9-FE18BE039402'
-
-
-# PROJECT_MSI_LIB_FEATURE_ID
-# The ID for the libraries features list. When available, the libraries will
-# be in this component.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'FeaturesLib'
-PROJECT_MSI_LIB_FEATURE_ID = 'FeaturesLib'
-
-
-# PROJECT_MSI_LIB_COMPONENT_ID
-# The ID for the libraries component.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'ComponentLib'
-PROJECT_MSI_LIB_COMPONENT_ID = 'ComponentLib'
+PROJECT_MSI_ETC_COMPONENT_GUID = '7E665EAF-446B-7738-84D9-FE18BE039402'
 
 
 # PROJECT_MSI_LIB_COMPONENT_GUID
@@ -1626,30 +1458,7 @@ PROJECT_MSI_LIB_COMPONENT_ID = 'ComponentLib'
 PROJECT_MSI_LIB_COMPONENT_GUID = '7E665EAF-446B-7738-84D9-FE18BE039403'
 
 
-# PROJECT_MSI_DOCS_FEATURE_ID
-# The ID for the documenations features list. When available, the documents will
-# be in this component.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# When in doubt, use the PROJECT_UUID and play with the last 6 characters.
-#
-# Default is: '*' - in some cases may fail.
-PROJECT_MSI_DOCS_FEATURE_ID = 'FeaturesDocs'
-
-
-# PROJECT_MSI_DOCS_COMPONENT_ID
-# The ID for the documentations component.
-#
-# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
-# packagers.
-#
-# Default is: 'ComponentDocs'
-PROJECT_MSI_DOCS_COMPONENT_ID = 'ComponentDocs'
-
-
-# PROJECT_MSI_DOCS_COMPONENT_GUID
+# PROJECT_MSI_DOC_COMPONENT_GUID
 # The unique GUID for the documentations component. Its value is similar to an
 # UUID type.
 #
@@ -1659,7 +1468,89 @@ PROJECT_MSI_DOCS_COMPONENT_ID = 'ComponentDocs'
 # When in doubt, use the PROJECT_UUID and play with the last 6 characters.
 #
 # Default is: '*' - in some cases may fail.
-PROJECT_MSI_DOCS_COMPONENT_GUID = '7E665EAF-446B-7738-84D9-FE18BE039404'
+PROJECT_MSI_DOC_COMPONENT_GUID = '7E665EAF-446B-7738-84D9-FE18BE039404'
+
+
+
+
+##########################
+# DISTRIBUTION - NUPKG   #
+##########################
+# PROJECT_DOTNET
+# This is a control variable used for enabling .NET technology in the
+# repository. Unlike other technologies, due to .NET nature, it is basically
+# a passive library located in the following directory:
+#     ${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS/${PROJECT_PATH_DOTNET_ENGINE}
+#
+# IMPORTANT NOTE: .NET is always enabled for Windows OS due to other critical
+# dependencies (specifically MSI packager). Hence, this variable only affects
+# UNIX side of things.
+#
+# Installing .NET can increase setup time dramatically (e.g. ~+2mins in some
+# CI service providers like GitHub Actions. Hence, you should only include it
+# when .NET is absolutely in use. Otherwise, disable it.
+#
+# This variable shall not affect AutomataCI's capability of packaging .nupkg
+# format. For that, the control variable is $PROJECT_NUPKG_URL.
+#
+# To enable it: simply supply the path (e.g. default is 'true').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_DOTNET = ''
+
+
+# PROJECT_NUPKG_URL
+# The registry url for publishing the DOTNET .nupkg package file. More info:
+#   (1) https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry
+#   (2) https://learn.microsoft.com/en-us/nuget/api/package-publish-resource
+#   (3) https://learn.microsoft.com/en-us/nuget/api/overview
+#
+# Some examples:
+#   (1) GitHub Package: 'https://nuget.pkg.github.com/[USERNAME]'
+#   (2) Nuget.org     : 'https://www.nuget.org/api/v2/package'
+#
+# This field also acts as the flag for enabling or disabling the nupkg
+# production pipeline.
+#
+# To enable : fill in the end-user downloadable URL without ending slash.
+# To disable: leave this field empty ('').
+#
+# !! IMPORTANT !! - Please avoid ending with the URL slash.
+PROJECT_NUPKG_URL = 'https://nuget.pkg.github.com/ChewKeanHo'
+
+
+# PROJECT_DOTNET_CHANNEL
+# This is to configure the .NET version to be installed by AutomataCI. It SHALL
+# NOT be empty.
+#
+# Refer the following doc "channel" section to learn more:
+#   https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-install-script
+#
+# When in doubt, use "LTS"
+PROJECT_DOTNET_CHANNEL = 'LTS'
+
+
+# DOTNET_CLI_TELEMETRY_OPTOUT
+# .NET default telemetry setting that will transmit its usage data back to
+# Microsoft.
+#
+# To preserve privacy and considering UNIX environments, it is enabled by
+# default.
+#
+# To enable: "1"
+# To disable: commit it out.
+DOTNET_CLI_TELEMETRY_OPTOUT = '1'
+
+
+# PROJECT_PATH_DOTNET_ENGINE
+# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
+# setting up .NET localized directory.
+PROJECT_PATH_DOTNET_ENGINE = 'dotnet-engine'
+
+
+# PROJECT_PATH_NUPKG
+# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS +
+# PROJECT_PATH_DOTNET_ENGINE for for housing .NET nupkg packages.
+PROJECT_PATH_NUPKG = 'nupkg'
 
 
 

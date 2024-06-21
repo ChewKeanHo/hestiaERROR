@@ -39,7 +39,7 @@ fi
 
 
 # setup inportant variables
-___name="${PROJECT_SKU}-${PROJECT_RESEARCH_IDENTIFIER}_${PROJECT_VERSION}_any-any"
+___name="${PROJECT_SKU}-${PROJECT_RESEARCH_ID}_${PROJECT_VERSION}_any-any"
 ___source="research-paper.odt"
 
 

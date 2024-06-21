@@ -43,7 +43,9 @@ RELEASE_Run_CITATION_CFF() {
         # execute
         I18N_Publish "CITATION.cff"
         if [ $(OS_Is_Run_Simulated) -ne 0 ]; then
-                FS_Copy_File "$1" "${PROJECT_PATH_ROOT}/CITATION.cff"
+                __dest="${PROJECT_PATH_ROOT}/CITATION.cff"
+                FS_Remove_Silently "$__dest"
+                FS_Copy_File "$1" "$__dest"
                 if [ $? -ne 0 ]; then
                         I18N_Publish_Failed
                         return 1

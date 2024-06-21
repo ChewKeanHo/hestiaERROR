@@ -357,10 +357,12 @@ FS_Is_Target_A_C() {
         fi
 
         if [ $(FS_Is_Target_A_Cargo "$1") -eq 0 ]; then
+                printf -- "1"
                 return 1
         fi
 
         if [ $(FS_Is_Target_A_Chocolatey "$1") -eq 0 ]; then
+                printf -- "1"
                 return 1
         fi
 

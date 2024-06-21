@@ -37,7 +37,7 @@ function RELEASE-Run-RESEARCH {
 		return 0
 	}
 
-	if ($($__target -replace "^.*${env:PROJECT_RESEARCH_IDENTIFIER}") -eq "${__target}") {
+	if ($($__target -replace "^.*${env:PROJECT_RESEARCH_ID}") -eq "${__target}") {
 		return 0 # not a research paper
 	}
 
@@ -48,6 +48,7 @@ function RELEASE-Run-RESEARCH {
 		$__dest = "PAPER.pdf"
 		$null = I18N-Publish "${__dest}"
 		$__dest = "${env:PROJECT_PATH_ROOT}\${__dest}"
+		$null = FS-Remove-Silently "${__dest}"
 		$___process = FS-Copy-File "${__target}" "${__dest}"
 		if ($___process -ne 0) {
 			$null = I18N-Publish-Failed

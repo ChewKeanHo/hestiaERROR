@@ -69,6 +69,10 @@ RELEASE_Conclude_CHECKSUM() {
 
                 # gpg sign all packages
                 for TARGET in "$1"/*; do
+                        if [ ! -e "$TARGET" ]; then
+                                continue # last entry is gibbrish from shell
+                        fi
+
                         if [ ! "${TARGET%%.asc*}" = "$TARGET" ]; then
                                 continue # it's a gpg cert
                         fi
@@ -95,6 +99,10 @@ RELEASE_Conclude_CHECKSUM() {
 
         # shasum all files
         for TARGET in "$1"/*; do
+                if [ ! -e "$TARGET" ]; then
+                        continue # last entry is gibbrish from shell
+                fi
+
                 FS_Is_Directory "$TARGET"
                 if [ $? -eq 0 ]; then
                         I18N_Is_Directory_Skipped "$TARGET"

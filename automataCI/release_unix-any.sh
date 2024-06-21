@@ -34,6 +34,7 @@ fi
 . "${LIBS_AUTOMATACI}/_release-homebrew_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-lib_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-npm_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-nupkg_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-project_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-pypi_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-research_unix-any.sh"
@@ -164,6 +165,12 @@ for TARGET in "$PACKAGE_DIRECTORY"/*; do
 
 
         RELEASE_Run_NPM "$TARGET"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        RELEASE_Run_NUPKG "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
         fi

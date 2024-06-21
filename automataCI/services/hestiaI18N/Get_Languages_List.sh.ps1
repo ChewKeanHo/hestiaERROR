@@ -33,7 +33,7 @@ echo \" <<'RUN_AS_POWERSHELL' >/dev/null # " | Out-Null
 # Windows POWERSHELL Codes                                                     #
 ################################################################################
 function hestiaI18N-Get-Languages-List {
-	return @"
+        return @"
 en
 zh-hans
 

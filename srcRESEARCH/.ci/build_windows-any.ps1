@@ -38,7 +38,7 @@ if ($___process -ne 0) {
 
 
 # setup important variables
-$___name = "${env:PROJECT_SKU}-${env:PROJECT_RESEARCH_IDENTIFIER}_${env:PROJECT_VERSION}_any-any"
+$___name = "${env:PROJECT_SKU}-${env:PROJECT_RESEARCH_ID}_${env:PROJECT_VERSION}_any-any"
 $___source = "research-paper.odt"
 
 

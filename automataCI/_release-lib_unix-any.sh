@@ -47,6 +47,12 @@ RELEASE_Run_LIBS() {
                 return 0
         fi
 
+        if [ $(FS_Is_Target_A_TARGZ "$1") -ne 0 ] ||
+                [ $(FS_Is_Target_A_TARXZ "$1") -ne 0 ] ||
+                [ $(FS_Is_Target_A_ZIP "$1") -ne 0 ]; then
+                return 0
+        fi
+
         GIT_Is_Available
         if [ $? -ne 0 ]; then
                 return 0
@@ -56,17 +62,17 @@ RELEASE_Run_LIBS() {
         # execute
         __branch="v${PROJECT_VERSION}"
         if [ $(FS_Is_Target_A_NPM "$1") -eq 0 ]; then
-                if [ $(STRINGS_Is_Empty "$PROJECT_NODE_BRANCH_TAG") -eq 0 ]; then
+                if [ $(STRINGS_Is_Empty "$PROJECT_NODE_NPM_ID") -eq 0 ]; then
                         return 0
                 fi
 
-                __branch="${__branch}_${PROJECT_NODE_BRANCH_TAG}"
+                __branch="${__branch}_${PROJECT_NODE_NPM_ID}"
         elif [ $(FS_Is_Target_A_C "$1") -eq 0 ]; then
-                if [ $(STRINGS_Is_Empty "$PROJECT_C_BRANCH_TAG") -eq 0 ]; then
+                if [ $(STRINGS_Is_Empty "$PROJECT_C_ID") -eq 0 ]; then
                         return 0
                 fi
 
-                __branch="${__branch}_${PROJECT_C_BRANCH_TAG}"
+                __branch="${__branch}_${PROJECT_C_ID}"
         else
                 return 0
         fi
@@ -97,7 +103,7 @@ RELEASE_Run_LIBS() {
         elif [ $(FS_Is_Target_A_ZIP "$1") -eq 0 ]; then
                 ZIP_Extract "$__workspace" "$1"
         else
-                FS_Copy_File "$1" "${__workspace}"
+                FS_Copy_File "$1" "${__workspace}/$(FS_Get_File "$1")"
         fi
 
         if [ $? -ne 0 ]; then

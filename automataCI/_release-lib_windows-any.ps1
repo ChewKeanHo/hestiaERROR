@@ -49,6 +49,12 @@ function RELEASE-Run-LIBS {
 		return 0
 	}
 
+	if (($(FS-Is-Target-A-TARGZ "${__target}") -ne 0) -or
+		($(FS-Is-Target-A-TARXZ "${__target}") -ne 0) -or
+		($(FS-Is-Target-A-ZIP "${__target}") -ne 0)) {
+		return 0
+	}
+
 	$___process = GIT-Is-Available
 	if ($___process -ne 0) {
 		return 0
@@ -58,17 +64,17 @@ function RELEASE-Run-LIBS {
 	# execute
 	$__branch = "v${env:PROJECT_VERSION}"
 	if ($(FS-Is-Target-A-NPM "${__target}") -eq 0) {
-		if ($(STRINGS-Is-Empty "${env:PROJECT_NODE_BRANCH_TAG}") -eq 0) {
+		if ($(STRINGS-Is-Empty "${env:PROJECT_NODE_NPM_ID}") -eq 0) {
 			return 0
 		}
 
-		$__branch = "${__branch}_${env:PROJECT_NODE_BRANCH_TAG}"
+		$__branch = "${__branch}_${env:PROJECT_NODE_NPM_ID}"
 	} elseif ($(FS-Is-Target-A-C "${__target}") -eq 0) {
-		if ($(STRINGS-Is-Empty "${env:PROJECT_C_BRANCH_TAG}") -eq 0) {
+		if ($(STRINGS-Is-Empty "${env:PROJECT_C_ID}") -eq 0) {
 			return 0
 		}
 
-		$__branch = "${__branch}_${env:PROJECT_C_BRANCH_TAG}"
+		$__branch = "${__branch}_${env:PROJECT_C_ID}"
 	} else {
 		return 0
 	}
@@ -102,7 +108,9 @@ function RELEASE-Run-LIBS {
 	} elseif ($(FS-Is-Target-A-ZIP "${__target}") -eq 0) {
 		$___process = ZIP-Extract "${__workspace}" "${__target}"
 	} else {
-		$___process = FS-Copy-File "${__target}" "${__workspace}"
+		$___process = FS-Copy-File `
+			"${__target}" `
+			"${__workspace}\$(FS-Get-File "${__target}")"
 	}
 
 	if ($___process -ne 0) {

@@ -45,7 +45,9 @@ function RELEASE-Run-CITATION-CFF {
 	# execute
 	$null = I18N-Publish "CITATION.cff"
 	if ($(OS-Is-Run-Simulated) -ne 0) {
-		$___process = FS-Copy-File "${__target}" "${env:PROJECT_PATH_ROOT}\CITATION.cff"
+		$__dest = "${env:PROJECT_PATH_ROOT}\CITATION.cff"
+		$null = FS-Remove-Silently "${__dest}"
+		$___process = FS-Copy-File "${__target}" "${__dest}"
 		if ($___process -ne 0) {
 			$null = I18N-Publish-Failed
 			return 1

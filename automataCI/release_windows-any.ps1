@@ -33,6 +33,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\_release-homebrew_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-lib_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-npm_windows-any.ps1"
+. "${env:LIBS_AUTOMATACI}\_release-nupkg_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-project_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-pypi_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-research_windows-any.ps1"
@@ -156,6 +157,11 @@ foreach ($TARGET in (Get-ChildItem -Path "${PACKAGE_DIRECTORY}")) { $TARGET = $T
 	}
 
 	$___process = RELEASE-Run-NPM "$TARGET"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = RELEASE-Run-NUPKG "$TARGET"
 	if ($___process -ne 0) {
 		return 1
 	}

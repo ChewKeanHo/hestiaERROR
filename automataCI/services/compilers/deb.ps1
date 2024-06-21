@@ -1104,7 +1104,9 @@ function DEB-Unpack {
 
 	# execute
 	# copy target into directory
-	$___process = FS-Copy-File "${___target}" "${___directory}"
+	$___process = FS-Copy-File `
+		"${___target}" `
+		"${___directory}\$(FS-Get-File "${___target}")"
 	if ($___process -ne 0) {
 		return 1
 	}
